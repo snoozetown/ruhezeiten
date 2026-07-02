@@ -1,10 +1,26 @@
 # Ruhezeiten
 
+<img src="docs/icon-512.png" alt="Ruhezeiten icon: a sleeping chipmunk face" width="96" height="96">
+
 Scheduled quiet hours for the Mudita Kompakt.
 
 As of this writing, Mudita has not provided a scheduled Do Not Disturb function for
 the Mudita Kompakt. Ruhezeiten is a small standalone app that toggles Android's real,
 system-level Do Not Disturb state on a daily schedule that you set.
+
+## What it does
+
+- Set a daily start time and end time for quiet hours (24-hour format).
+- Choose what's still allowed through: Priority only (alarms, plus starred
+  contacts), Alarms only, or total silence.
+- Runs as two self-rescheduling exact alarms -- no foreground service, no battery
+  drain beyond what any alarm-based app costs.
+- Survives reboot.
+
+<p>
+  <img src="docs/screenshot-main.png" alt="Main screen: status, enable toggle, start/end time" width="240">
+  <img src="docs/screenshot-dnd-options.png" alt="Quiet-hours level options and Save button" width="240">
+</p>
 
 ## Disclaimer
 
@@ -40,15 +56,6 @@ bug fixed on a timeline, please fork it; forking and modifying under the terms o
 - **Small and simple.** No analytics, no network access, no accounts, no dependencies
   beyond what's needed to render the UI and schedule two alarms.
 - **Stays open.** GPLv3 -- see [License](#license).
-
-## What it does
-
-- Set a daily start time and end time for quiet hours (24-hour format).
-- Choose what's still allowed through: Priority only (alarms, plus starred
-  contacts), Alarms only, or total silence.
-- Runs as two self-rescheduling exact alarms -- no foreground service, no battery
-  drain beyond what any alarm-based app costs.
-- Survives reboot.
 
 ## What it does *not* do
 
