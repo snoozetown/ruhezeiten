@@ -100,9 +100,9 @@ sideloaded APK on Kompakt (USB-C cable + ADB, per Mudita's own sideloading suppo
 
 1. Open Ruhezeiten. If either permission below isn't granted yet, you'll see a
    **Required permissions** section at the top with a button for each -- tap it,
-   grant access in the system screen that opens (not the broken MuditaOS K one), and
-   come back. Once a permission is granted, its section disappears entirely --
-   there's nothing left to do about it, so nothing stays on screen.
+   grant access in the system screen that opens, and come back. Once a permission
+   is granted, its section disappears entirely -- there's nothing left to do about
+   it, so nothing stays on screen.
 2. Set your start time, end time, and what's allowed through during quiet hours
    (Priority only / Alarms only / Nothing).
 3. Tap **Save**. A preview of exactly what's about to be applied appears above the
