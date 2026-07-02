@@ -8,7 +8,7 @@
     <string name="end_time_label">End time</string>
 
     <string name="dnd_level_label">During quiet hours, allow</string>
-    <string name="dnd_level_priority">Priority only (calls/alarms from starred contacts)</string>
+    <string name="dnd_level_priority">Priority only (alarms, plus starred contacts)</string>
     <string name="dnd_level_alarms">Alarms only</string>
     <string name="dnd_level_none">Nothing (total silence)</string>
     <string name="dnd_level_priority_short">Priority only</string>
