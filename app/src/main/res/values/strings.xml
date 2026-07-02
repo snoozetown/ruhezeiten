@@ -11,21 +11,29 @@
     <string name="dnd_level_priority">Priority only (calls/alarms from starred contacts)</string>
     <string name="dnd_level_alarms">Alarms only</string>
     <string name="dnd_level_none">Nothing (total silence)</string>
+    <string name="dnd_level_priority_short">Priority only</string>
+    <string name="dnd_level_alarms_short">Alarms only</string>
+    <string name="dnd_level_none_short">Total silence</string>
 
     <string name="permission_section_title">Required permissions</string>
 
     <string name="dnd_permission_label">Do Not Disturb access</string>
-    <string name="dnd_permission_granted">Granted</string>
     <string name="dnd_permission_not_granted">Not granted — required for quiet hours to work</string>
     <string name="dnd_permission_button">Grant Do Not Disturb access</string>
 
     <string name="alarm_permission_label">Exact alarm scheduling</string>
-    <string name="alarm_permission_granted">Granted</string>
     <string name="alarm_permission_not_granted">Not granted — required for quiet hours to start/end on time</string>
     <string name="alarm_permission_button">Grant exact alarm permission</string>
 
     <string name="status_active">Quiet hours are scheduled: %1$s – %2$s</string>
     <string name="status_inactive">Quiet hours are off</string>
 
+    <string name="save_preview_title">This will save</string>
+    <string name="save_preview_enabled">Quiet hours: on</string>
+    <string name="save_preview_disabled">Quiet hours: off</string>
+    <string name="save_preview_times">%1$s – %2$s</string>
+    <string name="save_preview_level">Allow: %1$s</string>
+
     <string name="save_button">Save</string>
+    <string name="save_confirmation">Saved.</string>
 </resources>

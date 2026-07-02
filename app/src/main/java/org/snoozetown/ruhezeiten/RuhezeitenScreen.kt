@@ -33,9 +33,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -60,6 +62,7 @@ fun RuhezeitenScreen() {
     var dndLevel by remember { mutableStateOf(schedule.value.dndLevel) }
     var dndGranted by remember { mutableStateOf(isDndAccessGranted(context)) }
     var alarmGranted by remember { mutableStateOf(isExactAlarmGranted(context)) }
+    var justSaved by remember { mutableStateOf(false) }
 
     val startTimeState = rememberTimeInputMMDState(
         initialHour = schedule.value.startHour,
@@ -79,15 +82,26 @@ fun RuhezeitenScreen() {
         onPauseOrDispose { }
     }
 
-    // TimeInputMMD's hour field autofocuses on first composition (Material3 TimeInput's default,
-    // meant for modal use). Our time inputs are always visible inline, so clear that focus and
-    // dismiss the keyboard it triggers rather than surprising the user with it on every launch.
+    // Each TimeInputMMD autofocuses its own hour field on first composition (Material3
+    // TimeInput's default, meant for modal use) and brings itself into view. With two
+    // TimeInputMMD instances on screen, the second one's autofocus wins that race and
+    // scrolls the whole screen down to reveal itself, hiding everything above it (permission
+    // section, switch, first time input) behind the top app bar. Clearing focus alone doesn't
+    // undo a scroll that already happened, so wait for both autofocus/bring-into-view
+    // animations to fully settle, then clear focus and force scroll back to the top.
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
+    val scrollState = rememberScrollState()
     LaunchedEffect(Unit) {
-        delay(50)
+        delay(300)
         focusManager.clearFocus(force = true)
         keyboardController?.hide()
+        scrollState.scrollTo(0)
+    }
+
+    // Any actual edit invalidates the last save's confirmation message.
+    LaunchedEffect(enabled, dndLevel, startTimeState.hour, startTimeState.minute, endTimeState.hour, endTimeState.minute) {
+        justSaved = false
     }
 
     Scaffold(
@@ -98,16 +112,65 @@ fun RuhezeitenScreen() {
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
+            // Permissions come first — nothing else on this screen works without them, and
+            // each item (label, status, button) disappears entirely once granted rather than
+            // leaving a permanent "Granted" line with nothing left to do about it. The whole
+            // section vanishes once both are granted; LifecycleResumeEffect above brings it
+            // back automatically if a permission is ever later revoked.
+            if (!dndGranted || !alarmGranted) {
+                TextMMD(
+                    text = stringResource(R.string.permission_section_title),
+                    style = androidx.compose.material3.MaterialTheme.typography.titleSmall
+                )
+                Spacer(12.dp)
+
+                if (!dndGranted) {
+                    TextMMD(stringResource(R.string.dnd_permission_label))
+                    TextMMD(stringResource(R.string.dnd_permission_not_granted))
+                    Spacer(4.dp)
+                    OutlinedButtonMMD(
+                        onClick = { context.startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        TextMMD(stringResource(R.string.dnd_permission_button))
+                    }
+                    Spacer(16.dp)
+                }
+
+                if (!alarmGranted) {
+                    TextMMD(stringResource(R.string.alarm_permission_label))
+                    TextMMD(stringResource(R.string.alarm_permission_not_granted))
+                    Spacer(4.dp)
+                    OutlinedButtonMMD(
+                        onClick = {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                context.startActivity(
+                                    Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                                        .setData(Uri.parse("package:${context.packageName}"))
+                                )
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        TextMMD(stringResource(R.string.alarm_permission_button))
+                    }
+                }
+
+                Divider20()
+            }
+
+            // Reflects the saved/active schedule, not live edits below — those aren't in
+            // effect until Save is tapped, so this must not change until then either.
             TextMMD(
-                text = if (enabled) {
+                text = if (schedule.value.enabled) {
                     stringResource(
                         R.string.status_active,
-                        formatTime(startTimeState.hour, startTimeState.minute),
-                        formatTime(endTimeState.hour, endTimeState.minute)
+                        formatTime(schedule.value.startHour, schedule.value.startMinute),
+                        formatTime(schedule.value.endHour, schedule.value.endMinute)
                     )
                 } else {
                     stringResource(R.string.status_inactive)
@@ -176,53 +239,45 @@ fun RuhezeitenScreen() {
                 )
             }
 
-            Divider20()
+            val hasPendingChanges = enabled != schedule.value.enabled ||
+                dndLevel != schedule.value.dndLevel ||
+                startTimeState.hour != schedule.value.startHour ||
+                startTimeState.minute != schedule.value.startMinute ||
+                endTimeState.hour != schedule.value.endHour ||
+                endTimeState.minute != schedule.value.endMinute
 
-            TextMMD(
-                text = stringResource(R.string.permission_section_title),
-                style = androidx.compose.material3.MaterialTheme.typography.titleSmall
-            )
+            if (hasPendingChanges) {
+                Divider20()
 
-            Spacer(12.dp)
-            TextMMD(stringResource(R.string.dnd_permission_label))
-            TextMMD(
-                text = stringResource(
-                    if (dndGranted) R.string.dnd_permission_granted else R.string.dnd_permission_not_granted
+                // A preview of exactly what Save will apply, shown right next to the button —
+                // scrolling to the bottom to tap Save shouldn't require also remembering or
+                // scrolling back up to check what you set earlier. Only shown when there's
+                // actually something unsaved to preview.
+                TextMMD(
+                    text = stringResource(R.string.save_preview_title),
+                    style = androidx.compose.material3.MaterialTheme.typography.titleSmall
                 )
-            )
-            Spacer(4.dp)
-            OutlinedButtonMMD(
-                onClick = { context.startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)) },
-                enabled = !dndGranted,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                TextMMD(stringResource(R.string.dnd_permission_button))
-            }
-
-            Spacer(16.dp)
-            TextMMD(stringResource(R.string.alarm_permission_label))
-            TextMMD(
-                text = stringResource(
-                    if (alarmGranted) R.string.alarm_permission_granted else R.string.alarm_permission_not_granted
+                Spacer(8.dp)
+                TextMMD(
+                    stringResource(
+                        if (enabled) R.string.save_preview_enabled else R.string.save_preview_disabled
+                    )
                 )
-            )
-            Spacer(4.dp)
-            OutlinedButtonMMD(
-                onClick = {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        context.startActivity(
-                            Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-                                .setData(Uri.parse("package:${context.packageName}"))
+                if (enabled) {
+                    TextMMD(
+                        stringResource(
+                            R.string.save_preview_times,
+                            formatTime(startTimeState.hour, startTimeState.minute),
+                            formatTime(endTimeState.hour, endTimeState.minute)
                         )
-                    }
-                },
-                enabled = !alarmGranted,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                TextMMD(stringResource(R.string.alarm_permission_button))
-            }
+                    )
+                    TextMMD(stringResource(R.string.save_preview_level, dndLevelShortLabel(dndLevel)))
+                }
 
-            Spacer(24.dp)
+                Spacer(16.dp)
+            } else {
+                Divider20()
+            }
 
             ButtonMMD(
                 onClick = {
@@ -237,10 +292,19 @@ fun RuhezeitenScreen() {
                     QuietHoursSchedule.save(context, updated)
                     AlarmScheduler.scheduleAll(context)
                     schedule.value = updated
+                    justSaved = true
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 TextMMD(stringResource(R.string.save_button))
+            }
+
+            if (justSaved) {
+                Spacer(8.dp)
+                TextMMD(
+                    text = stringResource(R.string.save_confirmation),
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
+                )
             }
 
             Spacer(20.dp)
@@ -275,6 +339,15 @@ private fun Spacer(size: androidx.compose.ui.unit.Dp, horizontal: Boolean = fals
         androidx.compose.foundation.layout.Spacer(Modifier.height(size))
     }
 }
+
+@Composable
+private fun dndLevelShortLabel(level: DndLevel): String = stringResource(
+    when (level) {
+        DndLevel.PRIORITY -> R.string.dnd_level_priority_short
+        DndLevel.ALARMS -> R.string.dnd_level_alarms_short
+        DndLevel.NONE -> R.string.dnd_level_none_short
+    }
+)
 
 @Composable
 private fun Divider20() {

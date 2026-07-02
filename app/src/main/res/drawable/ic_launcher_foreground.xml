@@ -4,7 +4,49 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    <!-- Sleeping chipmunk face: head, ears, puffy cheeks, closed eyes, nose, smile -->
+
+    <!-- Head, sized to fill most of the icon -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M63,30 A24,24 0 1 0 78,72 A30,30 0 1 1 63,30 Z" />
+        android:pathData="M26,58 a28,28 0 1,0 56,0 a28,28 0 1,0 -56,0 Z" />
+
+    <!-- Ears -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M24,32 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M66,32 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0 Z" />
+
+    <!-- Puffy cheeks, the key chipmunk cue -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M8,66 a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M72,66 a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0 Z" />
+
+    <!-- Closed, sleepy eyes — same U-shaped curve language as the smile -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M32,50 Q39,60 46,50 Q39,54 32,50 Z" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M62,50 Q69,60 76,50 Q69,54 62,50 Z" />
+
+    <!-- Nose -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M49,66 a4.5,4.5 0 1,0 9,0 a4.5,4.5 0 1,0 -9,0 Z" />
+
+    <!-- Philtrum, connecting nose to mouth -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M52.5,70 L55.5,70 L55.5,76 L52.5,76 Z" />
+
+    <!-- Smile -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M40,75 Q54,90 68,75 Q54,82 40,75 Z" />
 </vector>
