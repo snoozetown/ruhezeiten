@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Ruhezeiten</string>
+
+    <string name="enable_switch_label">Enable quiet hours</string>
+
+    <string name="start_time_label">Start time</string>
+    <string name="end_time_label">End time</string>
+
+    <string name="dnd_level_label">During quiet hours, allow</string>
+    <string name="dnd_level_priority">Priority only (calls/alarms from starred contacts)</string>
+    <string name="dnd_level_alarms">Alarms only</string>
+    <string name="dnd_level_none">Nothing (total silence)</string>
+
+    <string name="permission_section_title">Required permissions</string>
+
+    <string name="dnd_permission_label">Do Not Disturb access</string>
+    <string name="dnd_permission_granted">Granted</string>
+    <string name="dnd_permission_not_granted">Not granted — required for quiet hours to work</string>
+    <string name="dnd_permission_button">Grant Do Not Disturb access</string>
+
+    <string name="alarm_permission_label">Exact alarm scheduling</string>
+    <string name="alarm_permission_granted">Granted</string>
+    <string name="alarm_permission_not_granted">Not granted — required for quiet hours to start/end on time</string>
+    <string name="alarm_permission_button">Grant exact alarm permission</string>
+
+    <string name="status_active">Quiet hours are scheduled: %1$s – %2$s</string>
+    <string name="status_inactive">Quiet hours are off</string>
+
+    <string name="save_button">Save</string>
+</resources>
