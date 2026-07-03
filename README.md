@@ -87,20 +87,14 @@ If your quiet hours are starting or ending late (anywhere from a
 few minutes to nearly an hour), DuraSpeed freezing Ruhezeiten in the background while
 the screen is off may be the cause.
 
-You must enable Developer Options on the Kompakt to manage DuraSpeed settings.
+Fixing this needs Developer Options enabled -- see step 2 of
+[Installing](#installing) below if you skipped it. Once Developer Options is on, to
+exempt Ruhezeiten:
 
-If Developer Options isn't already enabled:
-
-1. Navigate to **Settings > About** > then tap **Build number** 7 times in a row
-   (you'll see an entry showing something like "MuditaOS K 1.5.0"; a message will appear
-   confirming Developer options are now enabled)
-
-Then, to exempt Ruhezeiten:
-
-2. Navigate to **Settings > System > Developer options** > and tap the search icon (magnifying glass, top
+1. Navigate to **Settings > System > Developer options** > and tap the search icon (magnifying glass, top
    right) > then search for **duraspeed**.
-3. Tap **DuraSpeed App info**, then tap **Open**.
-4. Scroll the list to **Ruhezeiten** and toggle it on.
+2. Tap **DuraSpeed App info**, then tap **Open**.
+3. Scroll the list to **Ruhezeiten** and toggle it on.
 
 This does not require root. (A root-only alternative exists via apps like
 [App Manager](https://github.com/MuntashirAkon/AppManager) -- DuraSpeed >
@@ -124,13 +118,22 @@ implementing it is very welcome (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 No root required -- this is a normal Android app.
 
 1. Download the latest APK from [Releases](../../releases).
-2. Open Mudita Center and connect your Kompakt.
-3. Under **Your Kompakt**, click **Manage Files**.
-4. Click **App Installers**.
-5. Click **Add App Files**, then browse to and select the APK you downloaded.
-6. Confirm to transfer the file to your Kompakt.
-7. On the Kompakt, tap the file you added.
-8. Check the box to confirm you accept the risk, then tap **Continue install**.
+2. On the Kompakt, turn on Developer Options now -- you'll need this in step 10 below
+   (see "A note on DuraSpeed" above for why): navigate to **Settings > About** > then tap **Build number** 7 times in a row
+   (you'll see an entry showing something like "MuditaOS K 1.5.0"; a message will
+   appear confirming Developer options are now enabled).
+3. Open Mudita Center and connect your Kompakt.
+4. Under **Your Kompakt**, click **Manage Files**.
+5. Click **App Installers**.
+6. Click **Add App Files**, then browse to and select the APK you downloaded.
+7. Confirm to transfer the file to your Kompakt.
+8. On the Kompakt, tap the file you added.
+9. Check the box to confirm you accept the risk, then tap **Continue install**.
+10. Once installed, exempt Ruhezeiten from DuraSpeed (see "A note on
+    DuraSpeed" above): navigate to **Settings > System > Developer options** > tap
+    the search icon (magnifying glass, top right) > search for **duraspeed** > tap
+    **DuraSpeed** > tap **Open** > scroll to **Ruhezeiten** and toggle
+    it on.
 
 Mudita warns that the Kompakt may not work correctly with third-party apps, and that
 you're adding them at your own risk. See the [Disclaimer](#disclaimer) above.
