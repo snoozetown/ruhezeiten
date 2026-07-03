@@ -3,6 +3,7 @@ package org.snoozetown.ruhezeiten
 import android.app.NotificationManager
 import android.content.Context
 import android.content.SharedPreferences
+import java.util.Calendar
 
 /**
  * DND level applied during quiet hours, mapped to NotificationManager.INTERRUPTION_FILTER_*.
@@ -21,6 +22,20 @@ data class QuietHoursSchedule(
     val endMinute: Int,
     val dndLevel: DndLevel
 ) {
+    /** True if right now falls inside the scheduled window, handling overnight wraparound. */
+    fun isCurrentlyActive(): Boolean {
+        if (!enabled) return false
+        val now = Calendar.getInstance()
+        val nowMinutes = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
+        val startMinutes = startHour * 60 + startMinute
+        val endMinutes = endHour * 60 + endMinute
+        return if (startMinutes <= endMinutes) {
+            nowMinutes in startMinutes until endMinutes
+        } else {
+            nowMinutes >= startMinutes || nowMinutes < endMinutes
+        }
+    }
+
     companion object {
         private const val PREFS_NAME = "ruhezeiten_prefs"
         private const val KEY_ENABLED = "enabled"

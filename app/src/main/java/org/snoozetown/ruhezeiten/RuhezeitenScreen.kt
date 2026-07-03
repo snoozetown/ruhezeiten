@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -62,6 +63,7 @@ fun RuhezeitenScreen() {
     var dndLevel by remember { mutableStateOf(schedule.value.dndLevel) }
     var dndGranted by remember { mutableStateOf(isDndAccessGranted(context)) }
     var alarmGranted by remember { mutableStateOf(isExactAlarmGranted(context)) }
+    var batteryUnrestricted by remember { mutableStateOf(isBatteryUnrestricted(context)) }
     var justSaved by remember { mutableStateOf(false) }
 
     val startTimeState = rememberTimeInputMMDState(
@@ -79,23 +81,30 @@ fun RuhezeitenScreen() {
     LifecycleResumeEffect(Unit) {
         dndGranted = isDndAccessGranted(context)
         alarmGranted = isExactAlarmGranted(context)
+        batteryUnrestricted = isBatteryUnrestricted(context)
         onPauseOrDispose { }
     }
 
     // Each TimeInputMMD autofocuses its own hour field on first composition (Material3
-    // TimeInput's default, meant for modal use) and brings itself into view. With two
-    // TimeInputMMD instances on screen, the second one's autofocus wins that race and
-    // scrolls the whole screen down to reveal itself, hiding everything above it (permission
-    // section, switch, first time input) behind the top app bar. Clearing focus alone doesn't
-    // undo a scroll that already happened, so wait for both autofocus/bring-into-view
-    // animations to fully settle, then clear focus and force scroll back to the top.
+    // TimeInput's default, meant for modal use), brings itself into view, and pops the
+    // keyboard. With two TimeInputMMD instances on screen, the second one's autofocus wins
+    // that race and scrolls the whole screen down to reveal itself, hiding everything above
+    // it (permission section, switch, first time input) behind the top app bar. A single
+    // clear-and-hide after a fixed delay isn't reliable -- on a slow/cold launch the actual
+    // autofocus can fire *after* that one-shot check already ran, leaving the keyboard open
+    // with nothing left to dismiss it. Instead, keep clearing focus and hiding the keyboard
+    // for a short settling window after launch, so whichever field ends up winning the
+    // autofocus race gets caught regardless of exactly when it fires -- then stop, so a
+    // deliberate tap on a time field later in the session opens the keyboard normally.
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val scrollState = rememberScrollState()
     LaunchedEffect(Unit) {
-        delay(300)
-        focusManager.clearFocus(force = true)
-        keyboardController?.hide()
+        repeat(15) {
+            delay(100)
+            focusManager.clearFocus(force = true)
+            keyboardController?.hide()
+        }
         scrollState.scrollTo(0)
     }
 
@@ -121,7 +130,7 @@ fun RuhezeitenScreen() {
             // leaving a permanent "Granted" line with nothing left to do about it. The whole
             // section vanishes once both are granted; LifecycleResumeEffect above brings it
             // back automatically if a permission is ever later revoked.
-            if (!dndGranted || !alarmGranted) {
+            if (!dndGranted || !alarmGranted || !batteryUnrestricted) {
                 TextMMD(
                     text = stringResource(R.string.permission_section_title),
                     style = androidx.compose.material3.MaterialTheme.typography.titleSmall
@@ -157,6 +166,24 @@ fun RuhezeitenScreen() {
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         TextMMD(stringResource(R.string.alarm_permission_button))
+                    }
+                    Spacer(16.dp)
+                }
+
+                if (!batteryUnrestricted) {
+                    TextMMD(stringResource(R.string.battery_permission_label))
+                    TextMMD(stringResource(R.string.battery_permission_not_granted))
+                    Spacer(4.dp)
+                    OutlinedButtonMMD(
+                        onClick = {
+                            context.startActivity(
+                                Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                                    .setData(Uri.parse("package:${context.packageName}"))
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        TextMMD(stringResource(R.string.battery_permission_button))
                     }
                 }
 
@@ -291,6 +318,15 @@ fun RuhezeitenScreen() {
                     )
                     QuietHoursSchedule.save(context, updated)
                     AlarmScheduler.scheduleAll(context)
+                    // Reflect the edit in the live DND state immediately if we're currently
+                    // inside (or just left) the scheduled window -- otherwise an edit made
+                    // mid-session would silently do nothing until the next scheduled
+                    // boundary, since the alarms above only affect the *next* start/end.
+                    if (updated.isCurrentlyActive()) {
+                        DndApplier.applyStart(context, updated.dndLevel)
+                    } else {
+                        DndApplier.applyEnd(context)
+                    }
                     schedule.value = updated
                     justSaved = true
                 },
@@ -368,4 +404,9 @@ private fun isExactAlarmGranted(context: Context): Boolean {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true
     val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     return am.canScheduleExactAlarms()
+}
+
+private fun isBatteryUnrestricted(context: Context): Boolean {
+    val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+    return pm.isIgnoringBatteryOptimizations(context.packageName)
 }

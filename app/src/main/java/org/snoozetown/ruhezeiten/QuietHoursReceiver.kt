@@ -20,10 +20,10 @@ class QuietHoursReceiver : BroadcastReceiver() {
         when (intent.action) {
             AlarmScheduler.ACTION_START -> {
                 val schedule = QuietHoursSchedule.load(context)
-                notificationManager.setInterruptionFilter(schedule.dndLevel.interruptionFilter)
+                DndApplier.applyStart(context, schedule.dndLevel)
             }
             AlarmScheduler.ACTION_END -> {
-                notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL)
+                DndApplier.applyEnd(context)
             }
         }
 

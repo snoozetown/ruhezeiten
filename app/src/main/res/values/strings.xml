@@ -25,6 +25,10 @@
     <string name="alarm_permission_not_granted">Not granted — required for quiet hours to start/end on time</string>
     <string name="alarm_permission_button">Grant exact alarm permission</string>
 
+    <string name="battery_permission_label">Battery optimization</string>
+    <string name="battery_permission_not_granted">Not granted — without this, quiet hours can start or end late</string>
+    <string name="battery_permission_button">Allow unrestricted battery usage</string>
+
     <string name="status_active">Quiet hours are scheduled: %1$s – %2$s</string>
     <string name="status_inactive">Quiet hours are off</string>
 

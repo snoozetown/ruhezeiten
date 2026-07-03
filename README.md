@@ -26,7 +26,7 @@ system-level Do Not Disturb state on a daily schedule that you set.
 
 This app was built with substantial AI assistance (Claude Code). The logic has been
 tested manually on a real device -- permission flows, scheduling, and the underlying
-DND behavior are all verified working, not just assumed -- but it has not had a
+DND behavior -- but it has not had a
 professional security review or extensive real-world testing across devices, OS
 versions, or edge cases. It comes with **no warranty of any kind** (see
 [LICENSE](LICENSE)).
@@ -34,23 +34,20 @@ versions, or edge cases. It comes with **no warranty of any kind** (see
 Do not rely on this app in situations where a missed or wrongly-timed notification
 would have serious consequences for you -- on-call work, medical alerts,
 safety-critical communications, or anything where your life or livelihood depends on
-it behaving correctly every single time. Use your own judgment, read the source (it's
-short), and test it yourself before trusting it for anything that matters.
+it behaving correctly every single time. Use your own judgment, read the source, and test it yourself before trusting it.
 
 This was built primarily to meet my own needs and is shared here as a courtesy to the
 Mudita Kompakt community -- not as a supported product. I don't guarantee any ongoing
 support, fixes, or changes. If you want something significantly different or need a
 bug fixed on a timeline, please fork it; forking and modifying under the terms of the
-[license](#license) is explicitly welcome, not a fallback.
+[license](#license) is welcome.
 
 ## Philosophy
 
 - **E-ink first.** Built on Mudita's own [MMD](https://github.com/mudita/MMD) design
-  system rather than bolting a generic Material app onto an e-ink device --
-  monochrome, no ripple/animation, large touch targets. We stick to MMD's own
-  components rather than mixing in bare Material3 widgets, so the app looks and
+  system so the app looks and
   behaves consistently with the rest of MuditaOS K.
-- **Accessible by default, not by accident.** WCAG 2.1 AA is the minimum target for
+- **Accessible by default.** WCAG 2.1 AA is the minimum target for
   all Snoozetown projects. Please do not hesitate to notify us of any accessibility
   issues you encounter.
 - **Small and simple.** No analytics, no network access, no accounts, no dependencies
@@ -78,9 +75,37 @@ implementation for this feature.
 For third-party messaging apps (Telegram, Signal/Molly, WhatsApp, etc.), whether a
 message from a starred contact gets through depends on whether *that app* correctly
 tags its notifications with a contact-linked sender -- something outside this app's
-control, and something we have not been able to verify for any specific third-party
+control, and something we have not verified for any specific third-party
 app. If a starred contact's message doesn't wake the device during quiet hours, that
-is a limitation of the messaging app's Android integration, not a bug in Ruhezeiten.
+is a limitation of the messaging app's Android integration.
+
+### A note on DuraSpeed (quiet hours starting or ending late)
+
+The Kompakt's MediaTek hardware ships with a proprietary background-app killer called
+DuraSpeed.
+If your quiet hours are starting or ending late (anywhere from a
+few minutes to nearly an hour), DuraSpeed freezing Ruhezeiten in the background while
+the screen is off may be the cause.
+
+You must enable Developer Options on the Kompakt to manage DuraSpeed settings.
+
+If Developer Options isn't already enabled:
+
+1. Navigate to **Settings > About** > then tap **Build number** 7 times in a row
+   (you'll see an entry showing something like "MuditaOS K 1.5.0"; a message will appear
+   confirming Developer options are now enabled)
+
+Then, to exempt Ruhezeiten:
+
+2. Navigate to **Settings > System > Developer options** > and tap the search icon (magnifying glass, top
+   right) > then search for **duraspeed**.
+3. Tap **DuraSpeed App info**, then tap **Open**.
+4. Scroll the list to **Ruhezeiten** and toggle it on.
+
+This does not require root. (A root-only alternative exists via apps like
+[App Manager](https://github.com/MuntashirAkon/AppManager) -- DuraSpeed >
+Restriction records > Lift Restriction -- but the Developer Options path above works
+without it.)
 
 ## Planned features
 
@@ -96,16 +121,31 @@ implementing it is very welcome (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 
 ## Installing
 
-No root required -- this is a normal Android app, installed the same way as any
-sideloaded APK on Kompakt (USB-C cable + ADB, per Mudita's own sideloading support).
+No root required -- this is a normal Android app.
 
 1. Download the latest APK from [Releases](../../releases).
-2. Enable USB debugging on the Kompakt and connect it to a computer.
-3. `adb install ruhezeiten.apk`
+2. Open Mudita Center and connect your Kompakt.
+3. Under **Your Kompakt**, click **Manage Files**.
+4. Click **App Installers**.
+5. Click **Add App Files**, then browse to and select the APK you downloaded.
+6. Confirm to transfer the file to your Kompakt.
+7. On the Kompakt, tap the file you added.
+8. Check the box to confirm you accept the risk, then tap **Continue install**.
+
+Mudita warns that the Kompakt may not work correctly with third-party apps, and that
+you're adding them at your own risk. See the [Disclaimer](#disclaimer) above.
+
+### Alternative: installing via ADB
+
+If you'd rather use ADB (e.g. you already have it set up, or you're building from
+source):
+
+1. Enable USB debugging on the Kompakt and connect it to a computer.
+2. Open a terminal and run `adb install ruhezeiten.apk` on the computer.
 
 ## Usage
 
-1. Open Ruhezeiten. If either permission below isn't granted yet, you'll see a
+1. Open Ruhezeiten. If any permission below isn't granted yet, you'll see a
    **Required permissions** section at the top with a button for each -- tap it,
    grant access in the system screen that opens, and come back. Once a permission
    is granted, its section disappears entirely -- there's nothing left to do about
@@ -124,7 +164,10 @@ sideloaded APK on Kompakt (USB-C cable + ADB, per Mudita's own sideloading suppo
 - **Exact alarm scheduling** -- required so quiet hours start/end on time rather
   than drifting by minutes to hours under Android's Doze battery optimizations. On
   this Android version, apps get this automatically at install -- you likely won't
-  see a button for it at all, and that's correct, not a bug.
+  see a button for it at all.
+- **Battery optimization** -- also needed so quiet hours start/end on time. Without
+  it, Android can delay Ruhezeiten's start/end alarms while your screen is off. (This
+  is separate from DuraSpeed, covered above -- you may need both.)
 
 ### FAQ / troubleshooting
 
@@ -133,17 +176,13 @@ granted -- open it again from the button; if the system screen shows the toggle
 already on, force-stop and reopen Ruhezeiten (the app only re-checks permission state
 when it resumes).
 
-**I don't see a button for exact alarms.** Expected -- see above. It's auto-granted
-at install on this OS version.
-
-**I changed a setting but the top status text didn't update.** That's intentional:
-the top line reflects what's *actually scheduled*, not what you've typed but haven't
-saved yet. Look for the "This will save…" preview above the Save button instead --
-that's your unsaved state.
-
 **Nothing happens when I tap Save.** Check to see whether the "Saved." text appears
 below the button. If you don't see it, you may be looking at a cached
 screenshot/stale view; try backgrounding and reopening the app.
+
+**Quiet hours start or end late, sometimes by close to an hour.** See "A note on
+DuraSpeed" above -- this is a MediaTek background-app killer separate from Ruhezeiten
+itself, and it needs its own exemption via Developer Options.
 
 ## Building from source
 
@@ -165,7 +204,8 @@ color scheme, no ripple/animation effects, large touch targets. See
 ## Contributing
 
 Bug reports, translations, and pull requests are welcome -- see
-[CONTRIBUTING.md](CONTRIBUTING.md).
+[CONTRIBUTING.md](CONTRIBUTING.md). See [CHANGELOG.md](CHANGELOG.md) for a history
+of notable changes.
 
 ## License
 
