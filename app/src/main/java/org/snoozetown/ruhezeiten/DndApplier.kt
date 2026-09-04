@@ -22,13 +22,14 @@ object DndApplier {
             // reachable through a Settings screen that hard-crashes
             // (ZenModeAlarmsPreferenceController ClassCastException), so there's no way for
             // the user to fix a misconfigured category from the OS side. Setting an explicit
-            // policy here guarantees "alarms, plus starred contacts" is actually true
-            // regardless of that broken screen -- at the cost of overwriting whatever
+            // policy here guarantees "alarms, calls from starred contacts, and media" is
+            // actually true regardless of that broken screen -- at the cost of overwriting whatever
             // system-wide DND category policy exists, not just for this app's window.
             notificationManager.setNotificationPolicy(
                 NotificationManager.Policy(
                     NotificationManager.Policy.PRIORITY_CATEGORY_ALARMS or
-                        NotificationManager.Policy.PRIORITY_CATEGORY_CALLS,
+                        NotificationManager.Policy.PRIORITY_CATEGORY_CALLS or
+                        NotificationManager.Policy.PRIORITY_CATEGORY_MEDIA,
                     NotificationManager.Policy.PRIORITY_SENDERS_STARRED,
                     NotificationManager.Policy.PRIORITY_SENDERS_ANY
                 )
