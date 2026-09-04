@@ -52,6 +52,8 @@ import com.mudita.mmd.components.time.TimeInputMMD
 import com.mudita.mmd.components.time.rememberTimeInputMMDState
 import com.mudita.mmd.components.top_app_bar.TopAppBarMMD
 import java.util.Locale
+import kotlin.time.Duration.Companion.milliseconds
+import androidx.core.net.toUri
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -101,7 +103,7 @@ fun RuhezeitenScreen() {
     val scrollState = rememberScrollState()
     LaunchedEffect(Unit) {
         repeat(15) {
-            delay(100)
+            delay(100.milliseconds)
             focusManager.clearFocus(force = true)
             keyboardController?.hide()
         }
@@ -156,12 +158,10 @@ fun RuhezeitenScreen() {
                     Spacer(4.dp)
                     OutlinedButtonMMD(
                         onClick = {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                context.startActivity(
-                                    Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-                                        .setData(Uri.parse("package:${context.packageName}"))
-                                )
-                            }
+                            context.startActivity(
+                                Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                                    .setData("package:${context.packageName}".toUri())
+                            )
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -178,7 +178,7 @@ fun RuhezeitenScreen() {
                         onClick = {
                             context.startActivity(
                                 Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                                    .setData(Uri.parse("package:${context.packageName}"))
+                                    .setData("package:${context.packageName}".toUri())
                             )
                         },
                         modifier = Modifier.fillMaxWidth()
@@ -401,7 +401,6 @@ private fun isDndAccessGranted(context: Context): Boolean {
 }
 
 private fun isExactAlarmGranted(context: Context): Boolean {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true
     val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     return am.canScheduleExactAlarms()
 }

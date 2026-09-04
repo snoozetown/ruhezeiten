@@ -25,13 +25,12 @@ object DndApplier {
             // policy here guarantees "alarms, plus starred contacts" is actually true
             // regardless of that broken screen -- at the cost of overwriting whatever
             // system-wide DND category policy exists, not just for this app's window.
-            notificationManager.setNotificationPolicy(
-                NotificationManager.Policy(
-                    NotificationManager.Policy.PRIORITY_CATEGORY_ALARMS or
-                        NotificationManager.Policy.PRIORITY_CATEGORY_CALLS,
-                    NotificationManager.Policy.PRIORITY_SENDERS_STARRED,
-                    NotificationManager.Policy.PRIORITY_SENDERS_ANY
-                )
+            notificationManager.notificationPolicy = NotificationManager.Policy(
+                NotificationManager.Policy.PRIORITY_CATEGORY_ALARMS or
+                        NotificationManager.Policy.PRIORITY_CATEGORY_CALLS or
+                        NotificationManager.Policy.PRIORITY_CATEGORY_MEDIA,
+                NotificationManager.Policy.PRIORITY_SENDERS_STARRED,
+                NotificationManager.Policy.PRIORITY_SENDERS_ANY
             )
         }
 
